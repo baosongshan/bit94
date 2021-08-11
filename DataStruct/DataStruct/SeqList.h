@@ -3,7 +3,7 @@
 
 #include"Common.h"
 
-#define ElemType int
+#define INC_SIZE 3
 
 //数据结构的定义
 typedef struct SeqList
@@ -14,17 +14,46 @@ typedef struct SeqList
 }SeqList;
 
 //函数声明
+bool _Inc(SeqList *pst);
+bool _IsFull(SeqList *pst);
+bool _IsEmpty(SeqList *pst);
+//--------------------------------------------------
 void SeqListInit(SeqList *pst, size_t capacity);
 void SeqListPushBack(SeqList *pst, ElemType v);
 void SeqListPushFront(SeqList *pst, ElemType v);
 void SeqListPopBack(SeqList *pst);
 void SeqListPopFront(SeqList *pst);
+void SeqListEraseByPos(SeqList *pst, int pos);
+void SeqListEraseByVal(SeqList *pst, ElemType key);
 void SeqListInsertByPos(SeqList *pst, int pos, ElemType v);
+void SeqListInsertByVal(SeqList *pst, ElemType v);
+size_t SeqListCapacity(SeqList *pst);
 size_t SeqListLength(SeqList *pst);
+
+ElemType SeqListFindByPos(SeqList *pst, int pos);
+int SeqListFindByVal(SeqList *pst, ElemType key);
+
+void SeqListSort(SeqList *pst);
+void SeqListReverse(SeqList *pst);
+
+void SeqListClear(SeqList *pst);
 void SeqListDestroy(SeqList *pst);
 void SeqListShow(SeqList *pst);
 
 //函数实现
+bool _Inc(SeqList *pst)
+{
+	pst->base = (ElemType *)realloc(pst->base, sizeof(ElemType) * (pst->capacity+INC_SIZE));
+	if(pst->base == NULL)
+		return false;
+	pst->capacity += INC_SIZE;
+	return true;
+}
+bool _IsFull(SeqList *pst)
+{return pst->size >= pst->capacity;}
+bool _IsEmpty(SeqList *pst)
+{return pst->size == 0;}
+
 void SeqListInit(SeqList *pst, size_t capacity)
 {
 	pst->capacity = capacity;
@@ -37,7 +66,7 @@ void SeqListInit(SeqList *pst, size_t capacity)
 void SeqListPushBack(SeqList *pst, ElemType v)
 {
 	//检查容量
-	if(pst->size >= pst->capacity)
+	if(_IsFull(pst) && !_Inc(pst))
 	{
 		printf("顺序表容量不足，%d 不能插入.\n", v);
 		return;
@@ -49,7 +78,7 @@ void SeqListPushBack(SeqList *pst, ElemType v)
 void SeqListPushFront(SeqList *pst, ElemType v)
 {
 	//检查容量
-	if(pst->size >= pst->capacity)
+	if(_IsFull(pst) && !_Inc(pst))
 	{
 		printf("顺序表容量不足，%d 不能插入.\n", v);
 		return;
@@ -67,7 +96,7 @@ void SeqListPushFront(SeqList *pst, ElemType v)
 
 void SeqListPopBack(SeqList *pst)
 {
-	if(pst->size == 0)
+	if(_IsEmpty(pst))
 	{
 		printf("顺序表已空，不能删除.\n");
 		return;
@@ -79,7 +108,7 @@ void SeqListPopBack(SeqList *pst)
 
 void SeqListPopFront(SeqList *pst)
 {
-	if(pst->size == 0)
+	if(_IsEmpty(pst))
 	{
 		printf("顺序表已空，不能删除.\n");
 		return;
@@ -93,7 +122,7 @@ void SeqListPopFront(SeqList *pst)
 void SeqListInsertByPos(SeqList *pst, int pos, ElemType v)
 {
 	//检查容量
-	if(pst->size >= pst->capacity)
+	if(_IsFull(pst) && !_Inc(pst))
 	{
 		printf("顺序表容量不足，%d 不能插入.\n", v);
 		return;
@@ -113,9 +142,108 @@ void SeqListInsertByPos(SeqList *pst, int pos, ElemType v)
 	pst->size++;
 }
 
+void SeqListInsertByVal(SeqList *pst, ElemType v)
+{
+	//寻找插入的位置
+	int pos = 0;
+	while(pos<pst->size &&  v>pst->base[pos])
+		pos++;
+
+	//插入数据
+	SeqListInsertByPos(pst, pos, v);
+}
+
+void SeqListEraseByPos(SeqList *pst, int pos)
+{
+	//检查位置
+	if(pos<0 || pos>=pst->size)
+	{
+		printf("删除的位置非法，不能删除数据.\n");
+		return;
+	}
+
+	//删除数据
+	for(int i=pos; i<pst->size-1; ++i)
+		pst->base[i] = pst->base[i+1];
+	pst->size--;
+}
+
+void SeqListEraseByVal(SeqList *pst, ElemType key)
+{
+	//查找关键值
+	int pos = SeqListFindByVal(pst, key);
+	if(pos == -1)
+	{
+		printf("要删除的数据不存在.\n");
+		return;
+	}
+
+	//删除数据
+	SeqListEraseByPos(pst, pos);
+}
+
+ElemType SeqListFindByPos(SeqList *pst, int pos)
+{
+	//检查位置
+	assert(pos>=0 && pos<pst->size);
+	return pst->base[pos];
+}
+
+int SeqListFindByVal(SeqList *pst, ElemType key)
+{
+	for(int i=0; i<pst->size; ++i)
+	{
+		if(key == pst->base[i])
+			return i;
+	}
+	return -1;
+}
+
 size_t SeqListLength(SeqList *pst)
 {
 	return pst->size;
+}
+size_t SeqListCapacity(SeqList *pst)
+{
+	return pst->capacity;
+}
+
+void SeqListClear(SeqList *pst)
+{
+	pst->size = 0;
+}
+
+void SeqListSort(SeqList *pst)
+{
+	for(int i=0; i<pst->size-1; ++i)
+	{
+		bool is_swap = false;
+
+		for(int j=0; j<pst->size-i-1; ++j)
+		{
+			if(pst->base[j] > pst->base[j+1])
+			{
+				Swap(&(pst->base[j]), &(pst->base[j+1]));
+				is_swap = true;
+			}
+		}
+
+		if(!is_swap)  //没有交换过数据
+			break;
+	}
+}
+
+void SeqListReverse(SeqList *pst)
+{
+	int left = 0;
+	int right = pst->size-1;
+
+	while(left < right)
+	{
+		Swap(&(pst->base[left]), &(pst->base[right]));
+		left++;
+		right--;
+	}
 }
 
 void SeqListDestroy(SeqList *pst)
@@ -131,4 +259,28 @@ void SeqListShow(SeqList *pst)
 		printf("%d ", pst->base[i]);
 	printf("\n");
 }
+
 #endif /* _SEQ_LIST_H_ */
+
+/*
+void SeqListEraseByVal(SeqList *pst, ElemType key)
+{
+	//查找关键值
+	int pos;
+	for(pos=0; pos<pst->size; ++pos)
+	{
+		if(key == pst->base[pos])
+			break;
+	}
+	if(pos >= pst->size)
+	{
+		printf("要删除的数据不存在.\n");
+		return;
+	}
+
+	//删除数据
+	for(int i=pos; i<pst->size-1; ++i)
+		pst->base[i] = pst->base[i+1];
+	pst->size--;
+}
+*/

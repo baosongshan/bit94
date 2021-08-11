@@ -1,11 +1,21 @@
 #include"SeqList.h"
+#include"List.h"
 
+void main()
+{
+	List mylist;//  ListNode *mylist;
+	InitList(&mylist);
+	CreateList(&mylist);
+	ShowList(mylist);
+}
+
+/*
 int main(int argc, char *argv[])
 {
 	SeqList mylist;
 	SeqListInit(&mylist, 8);
 
-	ElemType item;
+	ElemType item, value, key;
 	int pos;
 	int select = 1;
 	while(select)
@@ -58,8 +68,50 @@ int main(int argc, char *argv[])
 			scanf("%d", &item);
 			SeqListInsertByPos(&mylist, pos, item);
 			break;
+		case 7:
+			printf("请输入要插入的值:>");
+			scanf("%d", &item);
+			SeqListInsertByVal(&mylist, item);
+			break;
+		case 8:
+			printf("请输入要删除的位置:>");
+			scanf("%d", &pos);
+			SeqListEraseByPos(&mylist, pos);
+			break;
+		case 9:
+			printf("请输入要删除的值:>");
+			scanf("%d", &key);
+			SeqListEraseByVal(&mylist, key);
+			break;
+		case 10:
+			printf("请输入要查找的位置:>");
+			scanf("%d", &pos);
+			value = SeqListFindByPos(&mylist, pos);
+			printf("在%d位置的值为:> %d\n", pos, value);
+			break;
+		case 11:
+			printf("请输入要查找的值:>");
+			scanf("%d", &key);
+			pos = SeqListFindByVal(&mylist, key);
+			if(pos == -1)
+				printf("要查找的%d数据不存在.\n", key);
+			else
+				printf("要查找的数据%d在 %d位置.\n", key, pos);
+			break;
+		case 12:
+			SeqListSort(&mylist);
+			break;
+		case 13:
+			SeqListReverse(&mylist);
+			break;
 		case 14:
 			printf("顺序表的长度为:> %d\n", SeqListLength(&mylist));
+			break;
+		case 15:
+			printf("顺序表的容量为:> %d\n", SeqListCapacity(&mylist));
+			break;
+		case 16:
+			SeqListClear(&mylist);
 			break;
 		default:
 			break;
@@ -70,3 +122,4 @@ int main(int argc, char *argv[])
 	printf("GoodBye.\n");
 	return 0;
 }
+*/
